@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Button, Container, Row, Col, Card } from 'react-bootstrap';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -15,15 +16,9 @@ const ProductDetails = () => {
 
   const fetchProduct = async () => {
     try {
-      // Get all products and find the one (temporary solution)
       const res = await axios.get('http://localhost:8080/api/products');
       const foundProduct = res.data.find(p => p.id === parseInt(id));
-
-      if (foundProduct) {
-        setProduct(foundProduct);
-      } else {
-        console.error("Product not found");
-      }
+      setProduct(foundProduct);
     } catch (error) {
       console.error("Error fetching product:", error);
     } finally {
@@ -44,49 +39,63 @@ const ProductDetails = () => {
     }
   };
 
-  const handleUpdate = () => {
-    navigate(`/update-product/${id}`);
-  };
-
-  if (loading) return <h1 className="p-5">Loading product...</h1>;
-  if (!product) return <h1 className="p-5">Product not found</h1>;
+  if (loading) return <h3 className="text-center mt-5">Loading product...</h3>;
+  if (!product) return <h3 className="text-center mt-5 text-danger">Product not found</h3>;
 
   return (
-    <div className="p-5 max-w-2xl mx-auto">
-      <img
-        src={`http://localhost:8080/api/product/${product.id}/image`}
-        alt={product.name}
-        className="w-80 h-80 object-cover rounded mb-6"
-      />
+    <Container className="mt-5">
+      <Card className="shadow-sm">
+        <Row className="g-0">
+          <Col md={5}>
+            <img
+              src={`http://localhost:8080/api/product/${product.id}/image`}
+              alt={product.name}
+              className="img-fluid rounded-start"
+              style={{ height: "100%", objectFit: "cover", minHeight: "400px" }}
+            />
+          </Col>
 
-      <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-      <p className="text-gray-600 mb-4">{product.desc}</p>   {/* ← backend uses 'desc' */}
+          <Col md={7}>
+            <Card.Body className="p-5">
+              <Card.Title className="display-6 fw-bold">{product.name}</Card.Title>
+              <Card.Subtitle className="mb-3 text-muted fs-5">{product.brand}</Card.Subtitle>
 
-      <div className="space-y-2 mb-6">
-        <p><strong>Brand:</strong> {product.brand}</p>
-        <p><strong>Category:</strong> {product.category}</p>
-        <p><strong>Price:</strong> ${parseFloat(product.price).toFixed(2)}</p>
-        <p className={product.quantity > 0 ? 'text-green-600' : 'text-red-600'}>
-          <strong>Stock:</strong> {product.quantity}
-        </p>
-      </div>
+              <h3 className="text-success mb-4">${parseFloat(product.price).toFixed(2)}</h3>
 
-      <div className="flex gap-4">
-        <button
-          onClick={handleUpdate}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded"
-        >
-          Update Product
-        </button>
+              <p className="lead mb-4">{product.desc}</p>
 
-        <button
-          onClick={handleDelete}
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded"
-        >
-          Delete Product
-        </button>
-      </div>
-    </div>
+              <div className="mb-4">
+                <strong>Category:</strong> {product.category}<br />
+                <strong>Stock:</strong> 
+                <span className={product.quantity > 0 ? "text-success" : "text-danger"}>
+                  {" "}{product.quantity} units
+                </span>
+              </div>
+
+              <div className="d-flex gap-3 mt-5">
+                <Button 
+                  variant="warning" 
+                  size="lg"
+                  onClick={() => navigate(`/update-product/${id}`)}
+                  className="px-5"
+                >
+                  ✏️ Update Product
+                </Button>
+
+                <Button 
+                  variant="danger" 
+                  size="lg"
+                  onClick={handleDelete}
+                  className="px-5"
+                >
+                  🗑️ Delete Product
+                </Button>
+              </div>
+            </Card.Body>
+          </Col>
+        </Row>
+      </Card>
+    </Container>
   );
 };
 
