@@ -1,7 +1,14 @@
 import React from 'react';
 import { Card, Button } from 'react-bootstrap';
+import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ product, addToCart }) => {
+  const navigate = useNavigate();
+  <div
+    onClick={() => navigate(`/products/${product._id}`)}>
+
+  </div>
+
   return (
     <Card className="h-100 shadow-sm">
 

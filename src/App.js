@@ -10,6 +10,8 @@ import {
 import Home from './pages/Home';
 import AddProduct from './components/AddProduct';
 import NavigationBar from './components/NavigationBar';
+import ProductDetails from "./pages/ProductDetails";
+import UpdateProduct from "./pages/UpdateProduct";
 
 function App() {
 
@@ -58,6 +60,15 @@ function App() {
         <Route
           path="/add-product"
           element={<AddProduct />}
+        />
+
+        <Route
+          path="/products/:id"
+          element={<ProductDetails />}
+        />
+        <Route
+          path="/update-product/:id"
+          element={<UpdateProduct />}
         />
 
       </Routes>
