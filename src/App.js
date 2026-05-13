@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+export const API_BASE_URL = 'http://localhost:8080/api';
 
 import {
   BrowserRouter,
@@ -25,7 +26,7 @@ function App() {
     try {
 
       const response = await axios.get(
-        'http://localhost:8080/api/products'
+        `${API_BASE_URL}/products`
       );
 
       setProducts(response.data);
