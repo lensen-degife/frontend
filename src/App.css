@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+.hover-shadow {
+  transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15) !important;
+}
