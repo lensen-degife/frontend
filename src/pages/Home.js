@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import ProductCard from '../components/ProductCard';
 import axios from 'axios';
-import { API_BASE_URL } from '../App';   // Import the base URL
+import { API_BASE_URL } from '../App';
 
 const Home = ({ addToCart, searchTerm }) => {
   const [products, setProducts] = useState([]);
@@ -11,14 +11,11 @@ const Home = ({ addToCart, searchTerm }) => {
   const fetchProducts = async (keyword = '') => {
     setLoading(true);
     try {
-      let response;
-      if (keyword.trim() !== '') {
-        response = await axios.get(
-          `${API_BASE_URL}/products/search?keyword=${encodeURIComponent(keyword)}`
-        );
-      } else {
-        response = await axios.get(`${API_BASE_URL}/products`);
-      }
+      const url = keyword.trim() !== ''
+        ? `${API_BASE_URL}/products/search?keyword=${encodeURIComponent(keyword)}`
+        : `${API_BASE_URL}/products`;
+
+      const response = await axios.get(url);
       setProducts(response.data);
     } catch (error) {
       console.error("Search error:", error);
@@ -27,7 +24,7 @@ const Home = ({ addToCart, searchTerm }) => {
     }
   };
 
-  // Fetch when searchTerm changes
+  // Search when navbar searchTerm changes
   useEffect(() => {
     fetchProducts(searchTerm);
   }, [searchTerm]);
@@ -39,7 +36,6 @@ const Home = ({ addToCart, searchTerm }) => {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
-
     try {
       await axios.delete(`${API_BASE_URL}/product/${id}`);
       fetchProducts(searchTerm);
