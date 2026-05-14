@@ -1,30 +1,38 @@
 import React from 'react';
 import { Card, Button, Badge } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
-import { Pencil, Trash, Eye } from 'react-bootstrap-icons';   // ← Fixed
 
 const ProductCard = ({ product, addToCart, onDelete }) => {
   const navigate = useNavigate();
 
-  const handleDelete = (e) => {
-    e.stopPropagation();
-    if (window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
-      onDelete(product.id);
-    }
-  };
-
   return (
     <Card className="h-100 shadow-sm hover-shadow transition-all">
+      
+      {/* Clickable Image Area */}
       <div
         onClick={() => navigate(`/products/${product.id}`)}
         style={{ cursor: 'pointer' }}
       >
-        <Card.Img
-          variant="top"
-          src={`http://localhost:8080/api/product/${product.id}/image`}
-          alt={product.name}
-          style={{ height: '220px', objectFit: 'cover' }}
-        />
+        <div style={{ 
+          height: '260px',           // Increased a bit for better look
+          backgroundColor: '#f8f9fa',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden'
+        }}>
+          <img
+            src={`http://localhost:8080/api/product/${product.id}/image`}
+            alt={product.name}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',     // ← Changed from 'cover'
+              objectPosition: 'center',
+              padding: '8px'            // Optional: gives breathing space
+            }}
+          />
+        </div>
       </div>
 
       <Card.Body>
@@ -32,7 +40,12 @@ const ProductCard = ({ product, addToCart, onDelete }) => {
         <Card.Subtitle className="text-muted mb-2">{product.brand}</Card.Subtitle>
 
         <p className="text-secondary small mb-3"
-          style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          style={{ 
+            display: '-webkit-box', 
+            WebkitLineClamp: 2, 
+            WebkitBoxOrient: 'vertical', 
+            overflow: 'hidden' 
+          }}>
           {product.desc}
         </p>
 
