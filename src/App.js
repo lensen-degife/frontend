@@ -8,7 +8,7 @@ import NavigationBar from './components/NavigationBar';
 import ProductDetails from "./pages/ProductDetails";
 import UpdateProduct from "./pages/UpdateProduct";
 
-export const API_BASE_URL = 'http://localhost:8080/api';
+export const API_BASE_URL = 'http://localhost:8080/api'; // ← Make sure your backend runs on 8080
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -27,31 +27,19 @@ function App() {
   }, []);
 
   const addToCart = (product) => {
-    // TODO: Implement proper cart later (Context / Redux)
     console.log("Added to cart:", product);
     alert(`${product.name} added to cart!`);
+    // TODO: Use Context/Redux for real cart
   };
 
   return (
     <BrowserRouter>
       <NavigationBar />
       <Routes>
-        <Route
-          path="/"
-          element={<Home products={products} addToCart={addToCart} refreshProducts={fetchProducts} />}
-        />
-        <Route
-          path="/add-product"
-          element={<AddProduct onProductAdded={fetchProducts} />}
-        />
-        <Route
-          path="/products/:id"
-          element={<ProductDetails />}
-        />
-        <Route
-          path="/update-product/:id"
-          element={<UpdateProduct onProductUpdated={fetchProducts} />}
-        />
+        <Route path="/" element={<Home products={products} addToCart={addToCart} refreshProducts={fetchProducts} />} />
+        <Route path="/add-product" element={<AddProduct onProductAdded={fetchProducts} />} />
+        <Route path="/products/:id" element={<ProductDetails />} />
+        <Route path="/update-product/:id" element={<UpdateProduct onProductUpdated={fetchProducts} />} />
       </Routes>
     </BrowserRouter>
   );
