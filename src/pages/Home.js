@@ -15,7 +15,7 @@ const Home = ({ addToCart, refreshProducts: initialRefresh }) => {
       let response;
       if (keyword.trim() !== '') {
         // Use search endpoint
-        response = await axios.get(`http://localhost:8080/api/products/search?keyword=${keyword}`);
+        response = await axios.get(`http://localhost:8080/api/product/search?keyword=${keyword}`);
       } else {
         // Get all products
         response = await axios.get(`http://localhost:8080/api/products`);
