@@ -135,6 +135,3 @@ Contributions and improvements are welcome.
 
 ---
 
-## 📄 License
-
-Add your preferred license information here (MIT, Apache 2.0, etc.).
