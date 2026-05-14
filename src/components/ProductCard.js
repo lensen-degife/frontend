@@ -1,12 +1,21 @@
 import React from 'react';
-import { Card, Button } from 'react-bootstrap';
+import { Card, Button, Badge } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
+import { Edit, Trash2, Eye } from 'react-bootstrap-icons';
 
-const ProductCard = ({ product, addToCart }) => {
+const ProductCard = ({ product, addToCart, onDelete }) => {
   const navigate = useNavigate();
 
+  const handleDelete = (e) => {
+    e.stopPropagation(); // Prevent navigating to details
+    if (window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
+      onDelete(product.id);
+    }
+  };
+
   return (
-    <Card className="h-100 shadow-sm hover-shadow">
+    <Card className="h-100 shadow-sm hover-shadow transition-all">
+      {/* Clickable Image Area */}
       <div 
         onClick={() => navigate(`/products/${product.id}`)}
         style={{ cursor: 'pointer' }}
@@ -20,39 +29,75 @@ const ProductCard = ({ product, addToCart }) => {
       </div>
 
       <Card.Body>
-        <Card.Title>{product.name}</Card.Title>
-        <Card.Subtitle className="mb-2 text-muted">{product.brand}</Card.Subtitle>
+        <Card.Title className="mb-1">{product.name}</Card.Title>
+        <Card.Subtitle className="text-muted mb-2">{product.brand}</Card.Subtitle>
 
-        <p className="text-secondary small">{product.desc}</p>
+        <p className="text-secondary small mb-3" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {product.desc}
+        </p>
 
-        <div className="mb-2">
-          <strong>Category:</strong> {product.category}
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <h4 className="text-success mb-0">
+            ${parseFloat(product.price).toFixed(2)}
+          </h4>
+          <Badge 
+            bg={product.available && product.quantity > 0 ? "success" : "danger"}
+            className="fs-6"
+          >
+            {product.quantity} left
+          </Badge>
         </div>
 
-        <h4 className="text-success mb-2">${parseFloat(product.price).toFixed(2)}</h4>
-
-        <p className={`fw-bold ${product.quantity > 0 ? 'text-success' : 'text-danger'}`}>
-          {product.quantity > 0 ? `${product.quantity} in stock` : 'Out of stock'}
-        </p>
+        <small className="text-muted">Category: {product.category}</small>
       </Card.Body>
 
-      <Card.Footer className="bg-white">
+      <Card.Footer className="bg-white border-0 pt-0">
         <Button
           variant="primary"
           className="w-100 mb-2"
-          onClick={() => addToCart(product)}
-          disabled={product.quantity === 0}
+          onClick={(e) => {
+            e.stopPropagation();
+            addToCart(product);
+          }}
+          disabled={product.quantity <= 0}
         >
           Add to Cart
         </Button>
-        <Button
-          variant="outline-primary"
-          size="sm"
-          className="w-100"
-          onClick={() => navigate(`/update-product/${product.id}`)}
-        >
-          Edit
-        </Button>
+
+        <div className="d-flex gap-2">
+          {/* View Details */}
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            className="flex-fill"
+            onClick={() => navigate(`/products/${product.id}`)}
+          >
+            <Eye size={16} className="me-1" /> Details
+          </Button>
+
+          {/* Edit */}
+          <Button
+            variant="outline-primary"
+            size="sm"
+            className="flex-fill"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/update-product/${product.id}`);
+            }}
+          >
+            <Edit size={16} className="me-1" /> Edit
+          </Button>
+
+          {/* Delete */}
+          <Button
+            variant="outline-danger"
+            size="sm"
+            className="flex-fill"
+            onClick={handleDelete}
+          >
+            <Trash2 size={16} className="me-1" /> Delete
+          </Button>
+        </div>
       </Card.Footer>
     </Card>
   );
