@@ -1,200 +1,215 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from 'react-router-dom';
+import { Form, Button, Container, Row, Col, Alert, Card } from 'react-bootstrap';
 
-const UpdateProduct = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+function UpdateProduct({ onProductUpdated }) {
+    const { id } = useParams();
+    const navigate = useNavigate();
 
-  const [product, setProduct] = useState({
-    name: '', brand: '', desc: '', price: '', category: '',
-    quantity: '', releaseDate: '', available: true
-  });
+    const [product, setProduct] = useState({
+        name: '',
+        desc: '',
+        brand: '',
+        price: '',
+        category: '',
+        releaseDate: '',
+        available: true,
+        quantity: ''
+    });
 
-  const [imageFile, setImageFile] = useState(null);
-  const [message, setMessage] = useState({ text: '', variant: '' });
-  const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(true);
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [currentImage, setCurrentImage] = useState('');
+    const [message, setMessage] = useState({ text: '', type: '' });
+    const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchProduct();
-  }, [id]);
+    // Fetch existing product
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/api/product/${id}`);
+                const p = response.data;
+                setProduct({
+                    name: p.name || '',
+                    desc: p.desc || '',
+                    brand: p.brand || '',
+                    price: p.price || '',
+                    category: p.category || '',
+                    releaseDate: p.releaseDate ? p.releaseDate.split('T')[0] : '',
+                    available: p.available || false,
+                    quantity: p.quantity || ''
+                });
+                setCurrentImage(`http://localhost:8080/api/product/${id}/image`);
+            } catch (error) {
+                setMessage({ text: 'Failed to load product details', type: 'danger' });
+            }
+        };
+        fetchProduct();
+    }, [id]);
 
-  const fetchProduct = async () => {
-    try {
-      const res = await axios.get(`http://localhost:8080/api/product/${id}`);
-      setProduct({
-        name: res.data.name || '',
-        brand: res.data.brand || '',
-        desc: res.data.desc || '',
-        price: res.data.price || '',
-        category: res.data.category || '',
-        quantity: res.data.quantity || '',
-        releaseDate: res.data.releaseDate ? res.data.releaseDate.split('T')[0] : '',
-        available: res.data.available ?? true,
-      });
-    } catch (error) {
-      console.error(error);
-      setMessage({ text: 'Failed to load product', variant: 'danger' });
-    } finally {
-      setFetching(false);
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setProduct(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const handleImageChange = (e) => {
-    setImageFile(e.target.files[0]);
-  };
-  
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage({ text: '', variant: '' });
-
-    const formData = new FormData();
-
-    const productData = {
-        name: product.name,
-        brand: product.brand,
-        desc: product.desc,
-        price: Number(product.price),
-        category: product.category,
-        quantity: Number(product.quantity),
-        available: product.available,
-        releaseDate: product.releaseDate || null
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setProduct(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
     };
 
-    formData.append('product', JSON.stringify(productData));
-
-    if (imageFile) {
-        formData.append('imageFile', imageFile);   // Important
-    }
-
-    try {
-        await axios.put(`http://localhost:8080/api/product/${id}`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-            transformRequest: (data) => data
-        });
-
-        setMessage({ text: '✅ Product updated successfully!', variant: 'success' });
-        setTimeout(() => navigate(`/products/${id}`), 1500);
-
-    } catch (error) {
-        console.error("Full Update Error:", error.response || error);
-        
-        let errorMsg = 'Failed to update product';
-
-        if (error.response?.data) {
-            if (typeof error.response.data === 'string') {
-                errorMsg = error.response.data;
-            } else if (error.response.data.message) {
-                errorMsg = error.response.data.message;
-            } else if (error.response.data.error) {
-                errorMsg = error.response.data.error;
-            } else {
-                errorMsg = JSON.stringify(error.response.data).substring(0, 150);
-            }
-        } else if (error.message) {
-            errorMsg = error.message;
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
         }
+    };
 
-        setMessage({ text: errorMsg, variant: 'danger' });
-    } finally {
-        setLoading(false);
-    }
-};
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage({ text: '', type: '' });
 
-  if (fetching) return <Container className="mt-5 text-center"><h3>Loading...</h3></Container>;
+        try {
+            const formData = new FormData();
 
-  return (
-    <Container className="mt-4">
-      <h2 className="mb-4">Update Product</h2>
+            formData.append('product',
+                new Blob([JSON.stringify(product)], { type: 'application/json' })
+            );
 
-      {message.text && <Alert variant={message.variant}>{message.text}</Alert>}
+            if (imageFile) {
+                formData.append('imageFile', imageFile);
+            }
 
-      <Form onSubmit={handleSubmit}>
-        {/* Your form fields remain the same */}
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>Product Name</Form.Label>
-              <Form.Control type="text" name="name" value={product.name} onChange={handleChange} required />
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>Brand</Form.Label>
-              <Form.Control type="text" name="brand" value={product.brand} onChange={handleChange} required />
-            </Form.Group>
-          </Col>
-        </Row>
+            // ✅ IMPORTANT: Do NOT set Content-Type header
+            await axios.put(`http://localhost:8080/api/product/${id}`, formData);
 
-        <Form.Group className="mb-3">
-          <Form.Label>Description</Form.Label>
-          <Form.Control as="textarea" rows={3} name="desc" value={product.desc} onChange={handleChange} required />
-        </Form.Group>
+            setMessage({ text: '✅ Product updated successfully!', type: 'success' });
 
-        <Row>
-          <Col md={4}>
-            <Form.Group className="mb-3">
-              <Form.Label>Price</Form.Label>
-              <Form.Control type="number" name="price" value={product.price} onChange={handleChange} required />
-            </Form.Group>
-          </Col>
-          <Col md={4}>
-            <Form.Group className="mb-3">
-              <Form.Label>Category</Form.Label>
-              <Form.Control type="text" name="category" value={product.category} onChange={handleChange} required />
-            </Form.Group>
-          </Col>
-          <Col md={4}>
-            <Form.Group className="mb-3">
-              <Form.Label>Quantity</Form.Label>
-              <Form.Control type="number" name="quantity" value={product.quantity} onChange={handleChange} required />
-            </Form.Group>
-          </Col>
-        </Row>
+            if (onProductUpdated) onProductUpdated();
 
-        <Form.Group className="mb-3">
-          <Form.Label>Release Date</Form.Label>
-          <Form.Control type="date" name="releaseDate" value={product.releaseDate} onChange={handleChange} />
-        </Form.Group>
+            // Redirect after short delay
+            setTimeout(() => navigate('/'), 1500);
 
-        <Form.Group className="mb-4">
-          <Form.Label>New Image (Optional)</Form.Label>
-          <Form.Control type="file" onChange={handleImageChange} accept="image/*" />
-        </Form.Group>
+        } catch (error) {
+            console.error("Full Update Error:", error);
+            const errorMsg = error.response?.data?.message || error.message;
+            setMessage({ 
+                text: `❌ Update failed: ${errorMsg}`, 
+                type: 'danger' 
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        <Form.Check
-          type="checkbox"
-          label="Available"
-          name="available"
-          checked={product.available}
-          onChange={handleChange}
-          className="mb-4"
-        />
+    return (
+        <Container className="mt-4">
+            <Card className="shadow-sm">
+                <Card.Body>
+                    <h2 className="mb-4">Update Product</h2>
 
-        <div className="d-flex gap-3">
-          <Button variant="primary" type="submit" disabled={loading} size="lg">
-            {loading ? "Updating..." : "Update Product"}
-          </Button>
-          <Button variant="secondary" size="lg" onClick={() => navigate(-1)}>
-            Cancel
-          </Button>
-        </div>
-      </Form>
-    </Container>
-  );
-};
+                    {message.text && <Alert variant={message.type}>{message.text}</Alert>}
+
+                    {currentImage && !imagePreview && (
+                        <div className="mb-3">
+                            <p>Current Image:</p>
+                            <img src={currentImage} alt="Current" style={{ maxHeight: '180px' }} />
+                        </div>
+                    )}
+
+                    {imagePreview && (
+                        <div className="mb-3">
+                            <p>New Image Preview:</p>
+                            <img src={imagePreview} alt="Preview" style={{ maxHeight: '180px' }} />
+                        </div>
+                    )}
+
+                    <Form onSubmit={handleSubmit}>
+                        {/* Same form fields as AddProduct */}
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Product Name *</Form.Label>
+                                    <Form.Control type="text" name="name" value={product.name} onChange={handleChange} required />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Brand *</Form.Label>
+                                    <Form.Control type="text" name="brand" value={product.brand} onChange={handleChange} required />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Description *</Form.Label>
+                            <Form.Control as="textarea" rows={3} name="desc" value={product.desc} onChange={handleChange} required />
+                        </Form.Group>
+
+                        <Row>
+                            <Col md={4}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Price *</Form.Label>
+                                    <Form.Control type="number" step="0.01" name="price" value={product.price} onChange={handleChange} required />
+                                </Form.Group>
+                            </Col>
+                            <Col md={4}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Category *</Form.Label>
+                                    <Form.Select name="category" value={product.category} onChange={handleChange} required>
+                                        <option value="">Select Category</option>
+                                        <option value="Electronics">Electronics</option>
+                                        <option value="Fashion">Fashion</option>
+                                        <option value="Home Appliances">Home Appliances</option>
+                                        <option value="Books">Books</option>
+                                        <option value="Sports">Sports</option>
+                                    </Form.Select>
+                                </Form.Group>
+                            </Col>
+                            <Col md={4}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Quantity *</Form.Label>
+                                    <Form.Control type="number" name="quantity" value={product.quantity} onChange={handleChange} required />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Release Date *</Form.Label>
+                                    <Form.Control type="date" name="releaseDate" value={product.releaseDate} onChange={handleChange} required />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>New Image (optional)</Form.Label>
+                                    <Form.Control type="file" accept="image/*" onChange={handleImageChange} />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+
+                        <Form.Check
+                            type="checkbox"
+                            label="Available"
+                            name="available"
+                            checked={product.available}
+                            onChange={handleChange}
+                            className="mb-4"
+                        />
+
+                        <Button variant="success" type="submit" size="lg" disabled={loading}>
+                            {loading ? 'Updating...' : 'Update Product'}
+                        </Button>
+
+                        <Button variant="secondary" className="ms-3" onClick={() => navigate('/')}>
+                            Cancel
+                        </Button>
+                    </Form>
+                </Card.Body>
+            </Card>
+        </Container>
+    );
+}
 
 export default UpdateProduct;
