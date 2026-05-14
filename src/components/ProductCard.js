@@ -1,13 +1,13 @@
 import React from 'react';
 import { Card, Button, Badge } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
-import { Edit, Trash2, Eye } from 'react-bootstrap-icons';
+import { Pencil, Trash, Eye } from 'react-bootstrap-icons';   // ← Fixed
 
 const ProductCard = ({ product, addToCart, onDelete }) => {
   const navigate = useNavigate();
 
   const handleDelete = (e) => {
-    e.stopPropagation(); // Prevent navigating to details
+    e.stopPropagation();
     if (window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
       onDelete(product.id);
     }
@@ -15,7 +15,6 @@ const ProductCard = ({ product, addToCart, onDelete }) => {
 
   return (
     <Card className="h-100 shadow-sm hover-shadow transition-all">
-      {/* Clickable Image Area */}
       <div 
         onClick={() => navigate(`/products/${product.id}`)}
         style={{ cursor: 'pointer' }}
@@ -32,7 +31,8 @@ const ProductCard = ({ product, addToCart, onDelete }) => {
         <Card.Title className="mb-1">{product.name}</Card.Title>
         <Card.Subtitle className="text-muted mb-2">{product.brand}</Card.Subtitle>
 
-        <p className="text-secondary small mb-3" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+        <p className="text-secondary small mb-3" 
+           style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {product.desc}
         </p>
 
@@ -42,7 +42,6 @@ const ProductCard = ({ product, addToCart, onDelete }) => {
           </h4>
           <Badge 
             bg={product.available && product.quantity > 0 ? "success" : "danger"}
-            className="fs-6"
           >
             {product.quantity} left
           </Badge>
@@ -65,7 +64,6 @@ const ProductCard = ({ product, addToCart, onDelete }) => {
         </Button>
 
         <div className="d-flex gap-2">
-          {/* View Details */}
           <Button
             variant="outline-secondary"
             size="sm"
@@ -75,7 +73,6 @@ const ProductCard = ({ product, addToCart, onDelete }) => {
             <Eye size={16} className="me-1" /> Details
           </Button>
 
-          {/* Edit */}
           <Button
             variant="outline-primary"
             size="sm"
@@ -85,17 +82,16 @@ const ProductCard = ({ product, addToCart, onDelete }) => {
               navigate(`/update-product/${product.id}`);
             }}
           >
-            <Edit size={16} className="me-1" /> Edit
+            <Pencil size={16} className="me-1" /> Edit
           </Button>
 
-          {/* Delete */}
           <Button
             variant="outline-danger"
             size="sm"
             className="flex-fill"
             onClick={handleDelete}
           >
-            <Trash2 size={16} className="me-1" /> Delete
+            <Trash size={16} className="me-1" /> Delete
           </Button>
         </div>
       </Card.Footer>
