@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';   // or from App.js
 import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
 
 function AddProduct() {
@@ -29,53 +30,47 @@ function AddProduct() {
     const handleImageChange = (e) => {
         setImageFile(e.target.files[0]);
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!imageFile) {
+            setMessage('Please select an image');
+            return;
+        }
 
         try {
             const formData = new FormData();
 
             formData.append(
                 'product',
-                new Blob([JSON.stringify(product)], {
-                    type: 'application/json'
-                })
+                new Blob([JSON.stringify(product)], { type: 'application/json' })
             );
 
             formData.append('imageFile', imageFile);
 
             const response = await axios.post(
-                'http://localhost:8080/api/product',
+                'http://localhost:8080/api/product',   // direct URL for now
                 formData,
                 {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
+                    headers: { 'Content-Type': 'multipart/form-data' }
                 }
             );
 
-            console.log(response.data);
-            setMessage('Product added successfully!');
+            setMessage('✅ Product added successfully!');
 
+            // Reset form
             setProduct({
-                name: '',
-                desc: '',
-                brand: '',
-                price: '',
-                category: '',
-                releaseDate: '',
-                available: true,
-                quantity: ''
+                name: '', desc: '', brand: '', price: 0, category: '',
+                releaseDate: '', available: true, quantity: 0
             });
-
             setImageFile(null);
 
         } catch (error) {
-            console.error('Error adding product:', error);
-            setMessage('Failed to add product');
+            console.error("Add Product Error:", error);
+            setMessage('Failed: ' + (error.response?.data || error.message));
         }
     };
+
 
     return (
         <Container className="mt-4">

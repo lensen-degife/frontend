@@ -53,7 +53,7 @@ const UpdateProduct = () => {
   const handleImageChange = (e) => {
     setImageFile(e.target.files[0]);
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -62,44 +62,57 @@ const UpdateProduct = () => {
     const formData = new FormData();
 
     const productData = {
-      name: product.name,
-      brand: product.brand,
-      desc: product.desc,
-      price: Number(product.price),
-      category: product.category,
-      quantity: Number(product.quantity),
-      available: product.available,
-      releaseDate: product.releaseDate || null
+        name: product.name,
+        brand: product.brand,
+        desc: product.desc,
+        price: Number(product.price),
+        category: product.category,
+        quantity: Number(product.quantity),
+        available: product.available,
+        releaseDate: product.releaseDate || null
     };
 
     formData.append('product', JSON.stringify(productData));
 
     if (imageFile) {
-      formData.append('image', imageFile);
+        formData.append('imageFile', imageFile);   // Important
     }
 
     try {
-      await axios.put(`http://localhost:8080/api/product/${id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',   // Keep this line
-        },
-        // Important: Tell Axios not to transform the data
-        transformRequest: (data) => data
-      });
+        await axios.put(`http://localhost:8080/api/product/${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            transformRequest: (data) => data
+        });
 
-      setMessage({ text: '✅ Product updated successfully!', variant: 'success' });
-      setTimeout(() => navigate(`/products/${id}`), 1500);
+        setMessage({ text: '✅ Product updated successfully!', variant: 'success' });
+        setTimeout(() => navigate(`/products/${id}`), 1500);
 
     } catch (error) {
-      console.error("Full Error:", error.response || error);
-      setMessage({ 
-        text: error.response?.data?.message || 'Failed to update product', 
-        variant: 'danger' 
-      });
+        console.error("Full Update Error:", error.response || error);
+        
+        let errorMsg = 'Failed to update product';
+
+        if (error.response?.data) {
+            if (typeof error.response.data === 'string') {
+                errorMsg = error.response.data;
+            } else if (error.response.data.message) {
+                errorMsg = error.response.data.message;
+            } else if (error.response.data.error) {
+                errorMsg = error.response.data.error;
+            } else {
+                errorMsg = JSON.stringify(error.response.data).substring(0, 150);
+            }
+        } else if (error.message) {
+            errorMsg = error.message;
+        }
+
+        setMessage({ text: errorMsg, variant: 'danger' });
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   if (fetching) return <Container className="mt-5 text-center"><h3>Loading...</h3></Container>;
 
