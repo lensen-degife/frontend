@@ -1,8 +1,8 @@
 import React from 'react';
-import { Navbar, Container, Nav, Button } from 'react-bootstrap';
+import { Navbar, Container, Nav, Form, FormControl } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
 
-const NavigationBar = () => {
+const NavigationBar = ({ searchTerm, setSearchTerm }) => {
   const location = useLocation();
 
   return (
@@ -32,14 +32,16 @@ const NavigationBar = () => {
             </Nav.Link>
           </Nav>
 
-          {/* Optional: Future Cart Button */}
-          {/* 
-          <Nav>
-            <Button variant="outline-light" className="me-2">
-              Cart (0)
-            </Button>
-          </Nav>
-          */}
+          {/* Search Bar in Navbar */}
+          <Form className="d-flex ms-auto" style={{ width: "420px", maxWidth: "100%" }}>
+            <FormControl
+              type="search"
+              placeholder="Search by name, brand or category..."
+              className="me-2"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </Form>
         </Navbar.Collapse>
       </Container>
     </Navbar>

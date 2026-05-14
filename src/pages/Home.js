@@ -1,41 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 import ProductCard from '../components/ProductCard';
 import axios from 'axios';
+import { API_BASE_URL } from '../App';   // Import the base URL
 
-const Home = ({ addToCart, refreshProducts: initialRefresh }) => {
+const Home = ({ addToCart, searchTerm }) => {
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch all products or search results
   const fetchProducts = async (keyword = '') => {
     setLoading(true);
     try {
       let response;
       if (keyword.trim() !== '') {
-        // Use search endpoint
-        response = await axios.get(`http://localhost:8080/api/product/search?keyword=${keyword}`);
+        response = await axios.get(
+          `${API_BASE_URL}/products/search?keyword=${encodeURIComponent(keyword)}`
+        );
       } else {
-        // Get all products
-        response = await axios.get(`http://localhost:8080/api/products`);
+        response = await axios.get(`${API_BASE_URL}/products`);
       }
       setProducts(response.data);
     } catch (error) {
       console.error("Search error:", error);
-      alert("Failed to fetch products");
     } finally {
       setLoading(false);
     }
   };
 
-  // Search when user types (with debounce)
+  // Fetch when searchTerm changes
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      fetchProducts(searchTerm);
-    }, 500); // 500ms delay
-
-    return () => clearTimeout(delayDebounceFn);
+    fetchProducts(searchTerm);
   }, [searchTerm]);
 
   // Initial load
@@ -47,9 +41,8 @@ const Home = ({ addToCart, refreshProducts: initialRefresh }) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      await axios.delete(`http://localhost:8080/api/product/${id}`);
-      alert("Product deleted successfully!");
-      fetchProducts(searchTerm); // Refresh with current search
+      await axios.delete(`${API_BASE_URL}/product/${id}`);
+      fetchProducts(searchTerm);
     } catch (error) {
       alert("Failed to delete product");
     }
@@ -57,18 +50,7 @@ const Home = ({ addToCart, refreshProducts: initialRefresh }) => {
 
   return (
     <Container className="mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Our Products</h2>
-
-        <Form.Control
-          type="text"
-          placeholder="Search products by name, brand or category..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: '400px' }}
-        />
-      </div>
-
+      <h2 className="mb-4">Our Products</h2>
 
       {loading && <p className="text-center">Searching...</p>}
 
