@@ -15,7 +15,7 @@ const ProductCard = ({ product, addToCart, onDelete }) => {
 
   return (
     <Card className="h-100 shadow-sm hover-shadow transition-all">
-      <div 
+      <div
         onClick={() => navigate(`/products/${product.id}`)}
         style={{ cursor: 'pointer' }}
       >
@@ -31,8 +31,8 @@ const ProductCard = ({ product, addToCart, onDelete }) => {
         <Card.Title className="mb-1">{product.name}</Card.Title>
         <Card.Subtitle className="text-muted mb-2">{product.brand}</Card.Subtitle>
 
-        <p className="text-secondary small mb-3" 
-           style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+        <p className="text-secondary small mb-3"
+          style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {product.desc}
         </p>
 
@@ -40,7 +40,7 @@ const ProductCard = ({ product, addToCart, onDelete }) => {
           <h4 className="text-success mb-0">
             ${parseFloat(product.price).toFixed(2)}
           </h4>
-          <Badge 
+          <Badge
             bg={product.available && product.quantity > 0 ? "success" : "danger"}
           >
             {product.quantity} left
@@ -62,38 +62,6 @@ const ProductCard = ({ product, addToCart, onDelete }) => {
         >
           Add to Cart
         </Button>
-
-        <div className="d-flex gap-2">
-          <Button
-            variant="outline-secondary"
-            size="sm"
-            className="flex-fill"
-            onClick={() => navigate(`/products/${product.id}`)}
-          >
-            <Eye size={16} className="me-1" /> Details
-          </Button>
-
-          <Button
-            variant="outline-primary"
-            size="sm"
-            className="flex-fill"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/update-product/${product.id}`);
-            }}
-          >
-            <Pencil size={16} className="me-1" /> Edit
-          </Button>
-
-          <Button
-            variant="outline-danger"
-            size="sm"
-            className="flex-fill"
-            onClick={handleDelete}
-          >
-            <Trash size={16} className="me-1" /> Delete
-          </Button>
-        </div>
       </Card.Footer>
     </Card>
   );
